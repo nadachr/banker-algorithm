@@ -76,65 +76,55 @@ func command_create(p string, m1, m2, m3 int) {
 }
 
 func isSafe(p string, pt int, req int) bool {
-	x := 0     // number of process that have created
-	pc := 0    // address of process that request
+	x := 0  // number of process that have created
+	pc := 0 // address of process that request
 	nsafe := 0 // not safe
-
 	for n := range process {
 		if process[n] != "" {
 			x++
 		}
-
 		if process[n] == p {
 			pc = n
 		}
 	}
-
 	for j := range need {
 		if j >= x*3 {
 			break
 		}
 		fmt.Println("here1")
 		fail := 0
-
 		for i := range res {
 			if i+(j*3) >= x*3 {
 				continue
 			}
-
 			if i == pt {
 				check := res[pt] - req
-				if (i + (j * 3)) == (pt + (pc * 3)) {
+				if (i+(j*3)) == (pt+(pc*3)) {
 					new_need := need[pt+(pc*3)] - req
-					fmt.Printf("RES[%d] = %d |||| (new)need[%d] = %d\n", pt, check, i+(j*3), new_need)
-
-					if check < new_need { // || (check == 0 && check == new_need)
+					//fmt.Printf("RES[%d] = %d |||| (new)need[%d] = %d\n", pt, check, i+(j*3), new_need)
+					if check < new_need {	// || (check == 0 && check == new_need)
 						fail++
 						fmt.Println("fail1 = ", fail)
 					}
 					continue
 				}
-				fmt.Printf("RES[%d] = %d |||| need[%d] = %d\n", pt, check, i+(j*3), need[i+(j*3)])
-				if check < need[i+(j*3)] { //|| (check == 0 && check == need[i+(j*3)])
+				//fmt.Printf("RES[%d] = %d |||| need[%d] = %d\n", pt, check, i+(j*3), need[i+(j*3)])
+				if check < need[i+(j*3)] {		//|| (check == 0 && check == need[i+(j*3)]) 
 					fail++
 					fmt.Println("fail2 = ", fail)
 				}
 			} else {
-				fmt.Printf("res[%d] = %d |||| need[%d] = %d\n", i, res[i], i+(j*3), need[i+(j*3)])
-
-				if res[i] < need[i+(j*3)] { //|| (res[i] == 0 && res[i] == need[i+(j*3)])
+				// fmt.Printf("res[%d] = %d |||| need[%d] = %d\n", i, res[i], i+(j*3), need[i+(j*3)])
+				if res[i] < need[i+(j*3)] {		//|| (res[i] == 0 && res[i] == need[i+(j*3)])
 					fmt.Println("here3")
 					fail++
 					fmt.Println("fail3 = ", fail)
 				}
 			}
 		}
-
 		if fail > 0 {
 			nsafe++
-
 			fmt.Println("can't end the process", nsafe, "times")
-
 			if nsafe == x {
 				return false
 			}
@@ -162,28 +152,23 @@ func command_request(p string, t string, req int) {
 				if need[pt+(3*i)] >= req {
 					if isSafe(p, pt, req) {
 						if (res[pt] - req) >= 0 {
+							fmt.Printf("\nSafe!\n")
 							res[pt] = res[pt] - req
 							allo[pt+(3*i)] = allo[pt+(3*i)] + req
-							fmt.Printf("\nSafe!\n")
-
 							for n := range need {
 								need[n] = calNeed(max[n], allo[n])
 							}
-
 							if need[0+(3*i)] == 0 && need[1+(3*i)] == 0 && need[2+(3*i)] == 0 {
 								terminate(process[i])
 								break
 							}
 							break
-						} else {
-							fmt.Printf("\nNot Safe...\n")
-							break
 						}
 					} else {
-						fmt.Println("\nNot Safe...")
+						fmt.Println("\nNot Safe")
 					}
 				} else {
-					fmt.Printf("\nError, You request more than resource need.\n")
+					fmt.Printf("\nError, You request resource more than process need.\n")
 				}
 			}
 		}
